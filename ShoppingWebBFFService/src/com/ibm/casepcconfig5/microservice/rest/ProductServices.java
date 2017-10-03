@@ -25,9 +25,16 @@ import com.ibm.casepcconfig5.microservice.utils.Commons;
 import com.ibm.casepcconfig5.microservice.utils.Constants;
 import com.ibm.json.java.JSONObject;
 
+import com.ibm.casepcconfig5.microservice.cbbean.CircuitBreakerBean;
+import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
+import javax.inject.Inject;
+
 @ApplicationPath("/rest")
 @Path("Product")
 public class ProductServices extends Application {
+    
+    @Inject
+	CircuitBreakerBean cbBean;
 
 	@GET
 	@Path("/{id}")
@@ -50,11 +57,14 @@ public class ProductServices extends Application {
 		}
 
 		try {
-			URL url = new URL(urlStr);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
-			conn = setRequestProperty(conn, authString, method);
+		    
+		    HttpURLConnection conn = cbBean.invokeCategoryService(urlStr, authString, method);
+		    
+			//URL url = new URL(urlStr);
+			//HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			//conn.setDoInput(true);
+			//conn.setDoOutput(true);
+			//conn = setRequestProperty(conn, authString, method);
 
 			if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
 				List<String> ifMatchValue = headers.getRequestHeader("If-Match");
@@ -93,6 +103,13 @@ public class ProductServices extends Application {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
 					.header("Access-Control-Allow-Origin", "*").build();
 		} catch (IOException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+					.header("Access-Control-Allow-Origin", "*").build();
+		} catch (CircuitBreakerOpenException e) {
+			System.out.println("CircuitBreakerOpenException");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
+					.header("Access-Control-Allow-Origin", "*").build();
+		} catch (Exception e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
 					.header("Access-Control-Allow-Origin", "*").build();
 		}
