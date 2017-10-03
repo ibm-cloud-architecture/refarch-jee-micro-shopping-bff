@@ -25,6 +25,8 @@ dojo.declare("depot.OrderHistoryController",null,
 	getOrders:function()
 	{
 		console.debug("Getting Orders");
+		var grid = dijit.byId("orderHistoryGrid");
+		grid.errorMessage = "CustomerOrders service is temporarily unavailable.";
 		var getOrdersXhr = {
 				url: "/ShoppingWebBFFService/rest/Customer/Orders",
 				handleAs: "json",
