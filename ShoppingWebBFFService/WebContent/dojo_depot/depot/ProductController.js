@@ -30,6 +30,8 @@ dojo.declare("depot.ProductController",null,
 	},
 	loadCatalog:function()
 	{
+	    var grid = dijit.byId("productGrid");
+		grid.errorMessage = "Product Service is temporarily unavailable";
 		var getAccount = {
 			url: "/ShoppingWebBFFService/rest/Category",
 			handleAs: "json",
